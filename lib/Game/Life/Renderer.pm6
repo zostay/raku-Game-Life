@@ -4,6 +4,7 @@ unit module Game::Life::Renderer;
 
 use Game::Life::Board :board;
 
+#| Render the board to the text console.
 sub render-text(Board $board) is export {
     my ($l, $t, $r, $b) = $board.living-extents;
     for ($t-1) .. ($b+1) -> $y {
@@ -23,6 +24,7 @@ my $window;
 my $render;
 my $event;
 
+#| Render the board to an SDL graphics window.
 sub render-graphics(Board $board) is export {
     SDL_SetRenderDrawColor($render, 0, 0, 0, 0);
     SDL_RenderClear($render);
@@ -63,6 +65,7 @@ sub render-graphics(Board $board) is export {
     return False;
 }
 
+#| Initialize the SDL graphics window for rendering.
 sub initialize-graphics() is export {
     die "couldn't initialize SDL2: { SDL_GetError }"
         if SDL_Init(VIDEO) != 0;
