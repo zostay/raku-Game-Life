@@ -2,7 +2,9 @@ use v6;
 
 unit module Game::Life::Renderer;
 
-sub render-text(Board $board) {
+use Game::Life::Board :board;
+
+sub render-text(Board $board) is export {
     my ($l, $t, $r, $b) = $board.living-extents;
     for ($t-1) .. ($b+1) -> $y {
         for ($l-1) .. ($r+1) -> $x {
@@ -21,7 +23,7 @@ my $window;
 my $render;
 my $event;
 
-sub render-graphics(Board $board) {
+sub render-graphics(Board $board) is export {
     SDL_SetRenderDrawColor($render, 0, 0, 0, 0);
     SDL_RenderClear($render);
 
@@ -61,7 +63,7 @@ sub render-graphics(Board $board) {
     return False;
 }
 
-sub initialize-graphics() {
+sub initialize-graphics() is export {
     die "couldn't initialize SDL2: { SDL_GetError }"
         if SDL_Init(VIDEO) != 0;
 

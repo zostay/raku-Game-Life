@@ -1,7 +1,7 @@
 #!/usr/bin/env perl6
 use v6;
 
-use Game::Life::Board;
+use Game::Life::Board :board;
 use Game::Life;
 use Game::Life::Renderer;
 
@@ -28,7 +28,7 @@ sub initialize-renderer(Bool $graphics, Promise $done --> Supplier) {
 }
 
 sub initialize-game-of-life(Bool $parallel) {
-    my $game = Life.new;
+    my $game = Game::Life.new;
 
     if $parallel {
         supply {
