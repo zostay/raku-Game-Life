@@ -11,14 +11,29 @@ This is a string representing the initial state to load into Conway's Game of Li
 
 ```perl6
 method next-turn-for(
-    $l,
-    $t,
-    $r,
-    $b
+    Int:D $l,
+    Int:D $t,
+    Int:D $r,
+    Int:D $b
 ) returns Mu
 ```
 
 Evaluate the current board and make updates to the next. The next board is a clone of the current board, so we just make changes. The C<$l>, C<$t>, C<$r>, C<$b> items are the top-left and botto-rigth corner coordinates of the grid to work on. This modifies the C<$.next> board in place so there's no return value.
+
+class Mu $
+----------
+
+The leftmost coordinate to update.
+
+class Mu $
+----------
+
+The topmost coordinate to update.
+
+class Mu $
+----------
+
+The rightmost coordinate to update.
 
 ### method next-turn
 
@@ -32,14 +47,29 @@ Sequentially generate the board state from the previous state.
 
 ```perl6
 method parallel-next-turn-for(
-    $l,
-    $t,
-    $r,
-    $b
+    Int:D $l,
+    Int:D $t,
+    Int:D $r,
+    Int:D $b
 ) returns Mu
 ```
 
 Determine if the board is large and break it up into separate tasks. This will then perform the actual work for each section of the board using the C<method next-turn-for> method.
+
+class Mu $
+----------
+
+The leftmost coordinate to update.
+
+class Mu $
+----------
+
+The topmost coordinate to update.
+
+class Mu $
+----------
+
+The rightmost coordinate to update.
 
 ### method parallel-next-turn
 

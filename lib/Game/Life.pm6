@@ -63,7 +63,12 @@ class Game::Life {
     #| The C<$l>, C<$t>, C<$r>, C<$b> items are the top-left and botto-rigth
     #| corner coordinates of the grid to work on. This modifies the C<$.next>
     #| board in place so there's no return value.
-    method next-turn-for($l, $t, $r, $b) {
+    method next-turn-for(
+        Int:D $l, #= The leftmost coordinate to update.
+        Int:D $t, #= The topmost coordinate to update.
+        Int:D $r, #= The rightmost coordinate to update.
+        Int:D $b, #+ The bottommost coordinate to update.
+    ) {
         for $l..$r -> $x {
             for $t..$b -> $y {
 
@@ -101,7 +106,12 @@ class Game::Life {
     #| Determine if the board is large and break it up into separate tasks. This
     #| will then perform the actual work for each section of the board using
     #| the C<method next-turn-for> method.
-    method parallel-next-turn-for($l, $t, $r, $b) {
+    method parallel-next-turn-for(
+        Int:D $l, #= The leftmost coordinate to update.
+        Int:D $t, #= The topmost coordinate to update.
+        Int:D $r, #= The rightmost coordinate to update.
+        Int:D $b, #+ The bottommost coordinate to update.
+    ) {
         my @jobs = gather {
             if $r - $l > 20 {
                 my $m = ceiling($l + ($r - $l)/2);
