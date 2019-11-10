@@ -2,35 +2,43 @@ use v6;
 
 use Game::Life::Board :board;
 
+#| This class is a work in progress.
+#|
+#| This class performs the work of updating a board for each turn in Conway's
+#| Game of Life.
 class Game::Life {
-    has Board $.current .= new;
-    has Board $.next;
+    has Board $!current .= new;
+    has Board $!next;
 
-    has Str $.start-state = q:to/END_OF_DEFAULT_START_STATE/;
-
-    XXXXX  XXXX   X   XXXXX   X   X   x
-      X   x      X X    X    X X  X   X
-      X   X     X   X   X   X   X X   X
-      X    xxx  XXXXX   X   XXXXX XXXXX
-      X       X X   X   X   X   X X   X
-      X       X X   X   X   X   X X   X
-      X       X X   X   X   X   X X   X
-    XXXXX XXXX  X   X XXXXX X   X X   X
-
-    END_OF_DEFAULT_START_STATE
     # has Str $.start-state = q:to/END_OF_DEFAULT_START_STATE/;
     #
-    #                          X
-    #                        X X
-    #              XX      XX            XX
-    #             X   X    XX            XX
-    #  XX        X     X   XX
-    #  XX        X   X XX    X X
-    #            X     X       X
-    #             X   X
-    #              XX
+    # XXXXX  XXXX   X   XXXXX   X   X   x
+    #   X   x      X X    X    X X  X   X
+    #   X   X     X   X   X   X   X X   X
+    #   X    xxx  XXXXX   X   XXXXX XXXXX
+    #   X       X X   X   X   X   X X   X
+    #   X       X X   X   X   X   X X   X
+    #   X       X X   X   X   X   X X   X
+    # XXXXX XXXX  X   X XXXXX X   X X   X
     #
     # END_OF_DEFAULT_START_STATE
+
+    #| This is a string representing the initial state to load into Conway's
+    #| Game of Life. Every line of the string represents a line of the initial
+    #| board. Each space a dead cell and each non-space a life cell.
+    has Str $.start-state = q:to/END_OF_DEFAULT_START_STATE/;
+
+                             X
+                           X X
+                 XX      XX            XX
+                X   X    XX            XX
+     XX        X     X   XX
+     XX        X   X XX    X X
+               X     X       X
+                X   X
+                 XX
+
+    END_OF_DEFAULT_START_STATE
 
     method TWEAK() {
         my $x = 0;
@@ -78,6 +86,7 @@ class Game::Life {
         }
     }
 
+    #| Sequentially generate the board state from the previous state.
     method next-turn() {
         $!next = $!current.clone(mutable => True);
 
@@ -85,10 +94,13 @@ class Game::Life {
 
         self.next-turn-for($l-1, $t-1, $r+1, $b+1);
 
+        $!next.mutable = False;
         $!current = $!next;
-        $!current.mutable = False;
     }
 
+    #| Determine if the board is large and break it up into separate tasks. This
+    #| will then perform the actual work for each section of the board using
+    #| the C<method next-turn-for> method.
     method parallel-next-turn-for($l, $t, $r, $b) {
         my @jobs = gather {
             if $r - $l > 20 {
@@ -115,6 +127,8 @@ class Game::Life {
         await Promise.allof(@jobs);
     }
 
+    #| Generate the next board from the previous state, but employ parallel
+    #| computing methods to speed things up.
     method parallel-next-turn() {
         $!next = $!current.clone(mutable => True);
 
@@ -122,9 +136,10 @@ class Game::Life {
 
         await start self.parallel-next-turn-for($l-1, $t-1, $r+1, $b+1);
 
+        $!next.mutable = False;
         $!current = $!next;
-        $!current.mutable = False;
     }
 
+    #| Return the current board. This board will always be immutable.
     method board() { $!current }
 }
