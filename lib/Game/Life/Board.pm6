@@ -16,8 +16,8 @@ class Board is export(:board) {
     #| When set to C<False>, the board cannot be altered or expanded. Reading
     #| beyond the edges will always return a dead cell. Any attempt to change
     #| the board will cause an exception. The default is C<True> for mutability.
-    has Bool $.mutable is rw = True;
-
+    #| See L<method make-immutable> for changing this setting.
+    has Bool $.mutable = True;
 
     has Int $.left = 0;   #= The x coordinate of the leftmost possible live cell on the board.
     has Int $.top = 0;    #= The y coordinate of the topmost possible live cell on the board.
@@ -35,7 +35,7 @@ class Board is export(:board) {
 
     #| Cloning this board will autmoaticaly perform a deep clone of the board
     #| itself.
-    method clone(*%twiddles) {
+    method clone(*%twiddles --> Board:D) {
         without %twiddles<columns> {
             %twiddles<columns> = Array[Array[Bool]].clone;
             for @!columns.kv -> $i, $v {
@@ -45,6 +45,15 @@ class Board is export(:board) {
 
         callwith(|%twiddles);
     }
+
+    #| Calling this method will make the board immutable. Once immutable, it
+    #| cannot be changed ever again. Use the L<method next-board> to get a
+    #| mutable copy of this board.
+    method make-immutable(--> Bool:D) { $!mutable-- }
+
+    #| Calling this method will give you a mutable copy of this game
+    #| board.
+    method next-board(--> Board:D) { self.clone(mutable => True) }
 
     method !expand-left($by) {
         #note "EXPAND-LEFT $by";
@@ -177,8 +186,7 @@ class Board is export(:board) {
             }
         }
 
-        return (0, 0, 0, 0)
-            unless $ll < $!right && $lr > $!left && $lt < $!bottom && $lb > $!top;
+        return (0, 0, 0, 0) unless $ll <= $lr && $lt <= $lb;
 
         # Make sure the available extents are one wider than this
         if $extend {
@@ -192,5 +200,26 @@ class Board is export(:board) {
 
         ($ll, $lt, $lr, $lb);
     }
+}
+
+sub make-board(Str:D $start-state, Bool:D :$immutable = False) is export(:board) {
+    my Board $board .= new;
+
+    my $x = 0;
+    my $y = 0;
+    for $start-state.comb -> $v {
+        if $v ~~ /\n/ {
+            $y++;
+            $x = 0;
+            next;
+        }
+
+        $board.raise($x, $y) if $v ~~ /\S/;
+        $x++;
+    }
+
+    $board.make-immutable if $immutable;
+
+    $board;
 }
 
