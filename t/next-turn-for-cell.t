@@ -12,6 +12,8 @@ my Board $init = make-board(:immutable, q:to/END_OF_SPINNER/);
 XXX
 END_OF_SPINNER
 
+is-deeply $init.living-extents, (0, 0, 2, 0), 'init living extents match expectation';
+
 for -2, -1, 1, 2 -> $y {
     for -1..3 -> $x {
         nok $init.cell($x, $y), "initial ($x, $y) dead";
@@ -31,6 +33,8 @@ for -1..3 -> $y {
         TP.next-turn-for-cell($x, $y, $init, $next);
     }
 }
+
+is-deeply $next.living-extents, (1, -1, 1, 1), 'next living extents match expectation';
 
 for -2, 2 -> $y {
     for -1..3 -> $x {

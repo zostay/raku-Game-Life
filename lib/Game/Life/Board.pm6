@@ -11,13 +11,16 @@ unit package Game::Life;
 #| C<$.bottom>, which record the size of the grid contained. This is the largest
 #| possible area inside of which a live cell can be found.
 class Board is export(:board) {
-    has Array[Bool] @!columns;
+    has Array[Bool] @.columns;
 
     #| When set to C<False>, the board cannot be altered or expanded. Reading
     #| beyond the edges will always return a dead cell. Any attempt to change
     #| the board will cause an exception. The default is C<True> for mutability.
     #| See L<method make-immutable> for changing this setting.
     has Bool $.mutable = True;
+
+    #| This is a synonym for C<!$.mutable>.
+    method immutable(--> Bool:D) { !$!mutable }
 
     has Int $.left = 0;   #= The x coordinate of the leftmost possible live cell on the board.
     has Int $.top = 0;    #= The y coordinate of the topmost possible live cell on the board.

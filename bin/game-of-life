@@ -8,7 +8,7 @@ use Game::Life::Player;
 use Game::Life::Player::Basic;
 use Game::Life::Player::DivideAndConquer;
 
-sub initialize-renderer(Bool $graphics, Promise $done --> Supplier) {
+sub initialize-renderer(Bool :$graphics, Promise :$done --> Supplier) {
     my $render = Supplier.new;
     start {
         react {
@@ -30,7 +30,7 @@ sub initialize-renderer(Bool $graphics, Promise $done --> Supplier) {
     $render;
 }
 
-sub initialize-game-of-life(Bool $parallel) {
+sub initialize-game-of-life(Bool :$parallel, Str :$start-state) {
     my $player = do if $parallel {
         Game::Life::Player::DivideAndConquer.new;
     }
@@ -38,7 +38,8 @@ sub initialize-game-of-life(Bool $parallel) {
         Game::Life::Player::Basic.new;
     }
 
-    my $game = Game::Life.new(:$player);
+    my $board = make-board($start-state, :immutable);
+    my $game = Game::Life.new(:$player, :$board);
 
     supply {
         for 0..* -> $i {
@@ -48,12 +49,38 @@ sub initialize-game-of-life(Bool $parallel) {
     }
 }
 
-sub MAIN(Int :$steps = -1, Bool :$parallel = False, Bool :$graphics = False) {
+sub initialize-start-state(Str :$start-file) {
+    with $start-file {
+        $start-file.IO.slurp;
+    }
+    else {
+        q:to/END_OF_DEFAULT_START_STATE/;
+                                X
+                              X X
+                    XX      XX            XX
+                   X   X    XX            XX
+        XX        X     X   XX
+        XX        X   X XX    X X
+                  X     X       X
+                   X   X
+                    XX
+        END_OF_DEFAULT_START_STATE
+    }
+}
+
+sub MAIN(
+    Int :$steps = -1,
+    Bool :$parallel = False,
+    Bool :$graphics = False,
+    Str :$start-file,
+) {
+    my $start-state = initialize-start-state(:$start-file);
+
 	initialize-graphics if $graphics;
 
     my Promise $done .= new;
-    my Supplier $render = initialize-renderer($graphics, $done);
-    my Supply $turn = initialize-game-of-life($parallel);
+    my Supplier $render = initialize-renderer(:$graphics, :$done);
+    my Supply $turn = initialize-game-of-life(:$start-state, :$parallel);
 
     react {
         whenever $turn -> (Int $i, Board $board) {
