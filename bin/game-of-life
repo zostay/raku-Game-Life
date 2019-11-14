@@ -8,6 +8,7 @@ use Game::Life::Player;
 use Game::Life::Player::Basic;
 use Game::Life::Player::BasicIndexed;
 use Game::Life::Player::DivideAndConquer;
+use Game::Life::Player::ParallelMapReduce;
 
 sub initialize-renderer(Bool :$graphics, Promise :$done --> Supplier) {
     my $render = Supplier.new;
@@ -32,7 +33,10 @@ sub initialize-renderer(Bool :$graphics, Promise :$done --> Supplier) {
 }
 
 sub initialize-game-of-life(Bool :$parallel, Bool :$indexed, Str :$start-state) {
-    my $player = do if $indexed {
+    my $player = do if $indexed && $parallel {
+        Game::Life::Player::ParallelMapReduce.new;
+    }
+    elsif $indexed {
         Game::Life::Player::BasicIndexed.new;
     }
     elsif $parallel {
