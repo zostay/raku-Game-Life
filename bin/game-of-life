@@ -6,6 +6,7 @@ use Game::Life;
 use Game::Life::Renderer;
 use Game::Life::Player;
 use Game::Life::Player::Basic;
+use Game::Life::Player::BasicIndexed;
 use Game::Life::Player::DivideAndConquer;
 
 sub initialize-renderer(Bool :$graphics, Promise :$done --> Supplier) {
@@ -30,8 +31,11 @@ sub initialize-renderer(Bool :$graphics, Promise :$done --> Supplier) {
     $render;
 }
 
-sub initialize-game-of-life(Bool :$parallel, Str :$start-state) {
-    my $player = do if $parallel {
+sub initialize-game-of-life(Bool :$parallel, Bool :$indexed, Str :$start-state) {
+    my $player = do if $indexed {
+        Game::Life::Player::BasicIndexed.new;
+    }
+    elsif $parallel {
         Game::Life::Player::DivideAndConquer.new;
     }
     else {
@@ -71,6 +75,7 @@ sub initialize-start-state(Str :$start-file) {
 sub MAIN(
     Int :$steps = -1,
     Bool :$parallel = False,
+    Bool :$indexed = False,
     Bool :$graphics = False,
     Str :$start-file,
 ) {
@@ -80,7 +85,7 @@ sub MAIN(
 
     my Promise $done .= new;
     my Supplier $render = initialize-renderer(:$graphics, :$done);
-    my Supply $turn = initialize-game-of-life(:$start-state, :$parallel);
+    my Supply $turn = initialize-game-of-life(:$start-state, :$parallel, :$indexed);
 
     react {
         whenever $turn -> (Int $i, Board $board) {

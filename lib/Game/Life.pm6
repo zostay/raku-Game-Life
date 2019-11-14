@@ -14,6 +14,10 @@ class Game::Life {
     #| The initial board must be supplied. The board will always be immutable.
     has Board $.board is required where { .immutable };
 
+    method TWEAK() {
+        $!player.peek($!board);
+    }
+
     #| Sequentially generate the board state from the previous state.
     method next-turn() {
         my $next = $!player.next-turn($!board);

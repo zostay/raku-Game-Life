@@ -133,7 +133,7 @@ class Board is export(:board) {
     method raise(Int:D $x, Int:D $y --> Bool:D) {
         die "This board has been marked immutable." unless $!mutable;
         #note "RAISE ($x, $y)";
-        self!lookup($x, $y)++;
+        ++self!lookup($x, $y);
     }
 
     #| Kills the cell at C<($x, $y)>. Returns the state the cell had before.
@@ -142,7 +142,7 @@ class Board is export(:board) {
     method kill(Int:D $x, Int:D $y --> Bool:D) {
         die "This board has been marked immutable." unless $!mutable;
         #note "KILL  ($x, $y)";
-        self!lookup($x, $y)--;
+        --self!lookup($x, $y);
     }
 
     #| Returns the liveness of the eight surrounding cells. If you care, the top
