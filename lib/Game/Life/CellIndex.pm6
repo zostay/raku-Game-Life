@@ -60,4 +60,7 @@ class Game::Life::CellIndex {
     multi method living-cells(--> Seq:D) {
         $!living.keys
     }
+
+    multi method neighbors(--> Bag:D) { $!neighbors.Bag }
+    multi method living(--> Set:D) { $!living.Set }
 }

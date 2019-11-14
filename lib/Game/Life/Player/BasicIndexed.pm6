@@ -9,42 +9,21 @@ class Game::Life::Player::BasicIndexed does Game::Life::Player::Indexed {
 
         my $next = $current.next-board;
 
-        my $living-cells   = $.cells.living-cells.Set;
-        my $zeropopulated  = $.cells.living-cells.Set ∖ $.cells.neighboring-cells.Set;
-        my $underpopulated = $.cells.neighboring-cells(1).Set;
-        my $overpopulated  = $.cells.neighboring-cells(4..8).Set;
-        my $quickening     = $.cells.neighboring-cells(3).Set;
-
-        # note "LIVING: ", $living-cells;
-        # note "ZERO:   ", $zeropopulated;
-        # note "UNDER:  ", $underpopulated;
-        # note "OVER:   ", $overpopulated;
-        # note "QUICK:  ", $quickening;
-
-        my $kill =
-            $zeropopulated
-            ∪
-            ($living-cells ∩ $underpopulated)
-            ∪
-            ($living-cells ∩ $overpopulated)
-            ;
-
-        my $raise = $quickening ∖ $living-cells;
-
-        # note "KILL:  ", $kill;
-        # note "RAISE: ", $raise;
-
-        # for flat $kill.keys, $raise.keys -> $c {
-        #     self.next-turn-for-cell($c.x, $c.y, $current, $next);
-        # }
-        for $kill.keys -> $c {
-            $next.kill($c.x, $c.y);
-            $.cells.kill($c.x, $c.y);
-        }
-
-        for $raise.keys -> $c {
-            $next.raise($c.x, $c.y);
-            $.cells.raise($c.x, $c.y);
+        my $living-cells = $.cells.living;
+        my $neighbors    = $.cells.neighbors;
+        for ($living-cells ∪ $neighbors).keys -> $c {
+            if $living-cells{ $c } {
+                if $c ∉ $neighbors || $neighbors{ $c } == 1 || $neighbors{ $c } > 3 {
+                    $.cells.kill($c.x, $c.y);
+                    $next.kill($c.x, $c.y);
+                }
+            }
+            else {
+                if $neighbors{ $c } == 3 {
+                    $.cells.raise($c.x, $c.y);
+                    $next.raise($c.x, $c.y);
+                }
+            }
         }
 
         $next;
